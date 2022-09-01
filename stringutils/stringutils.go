@@ -2,7 +2,6 @@ package stringutils
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"strings"
 
@@ -22,7 +21,7 @@ func Reverse(s string) string {
 func CriptografaString(senha string, cost int) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(senha), cost)
 
-	fmt.Println("Hash: " + string(bytes))
+	//fmt.Println("Hash: " + string(bytes))
 	return string(bytes), err
 }
 
