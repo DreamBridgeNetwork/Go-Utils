@@ -1,4 +1,4 @@
-module github.com/DreamBridgeNetwork/Go-Utils/utils
+module github.com/DreamBridgeNetwork/Go-Utils
 
 go 1.18
 
