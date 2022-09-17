@@ -83,7 +83,9 @@ func (email *TextEmail) EnviaEmailSMTP() error {
 
 	err = smtp.SendMail("smtp.gmail.com:587",
 		smtp.PlainAuth("", email.From, email.Password, "smtp.gmail.com"),
-		email.From, email.To, messageStr)
+		email.From,
+		email.To,
+		messageStr)
 
 	if err != nil {
 		log.Printf("smtp error: %s", err)
