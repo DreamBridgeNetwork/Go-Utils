@@ -2,79 +2,73 @@ package jwtutils
 
 import (
 	"crypto/rsa"
-	"encoding/base64"
-	"encoding/json"
-	"errors"
 	"log"
-	"math/big"
+
+	"github.com/golang-jwt/jwt/v4"
 )
 
-// JSONKey represents a raw key inside a JWKS.
-type JSONKey struct {
-	Curve       string `json:"crv"`
-	Exponent    string `json:"e"`
-	ID          string `json:"kid"`
-	Modulus     string `json:"n"`
-	X           string `json:"x"`
-	Y           string `json:"y"`
-	precomputed interface{}
+/*func GenerateUnsignedJWT(payload string) (string, error) {
+
+	token := jwt.New(jwt.SigningMethodNone)
+
+	claims := token.Claims.(jwt.MapClaims)
+	claims["exp"] = time.Now().Add(10 * time.Minute)
+	claims["authorized"] = true
+	claims["user"] = "username"
+
+	token := jwt.New(jwt.SigningMethodNone)
+
+	tokenString := token.Raw
+
+	return tokenString, nil
+}*/
+
+func GenerateSignedRSAJWT(claims *CustomClaims, privateKey *rsa.PrivateKey) (string, error) {
+
+	token := jwt.NewWithClaims(jwt.SigningMethodRS512, claims)
+
+	tokenString, err := token.SignedString(privateKey)
+	if err != nil {
+		log.Println("jwtutils.GenerateSignedRSAJWT - Error signing jwt.")
+		return "", err
+	}
+
+	return tokenString, nil
 }
 
-// RSA - Parses a JSONKey and turns it into an RSA public key.
-func (j *JSONKey) RSA() (publicKey *rsa.PublicKey, err error) {
-
-	// Check if the key has already been computed.
-	if j.precomputed != nil {
-		return j.precomputed.(*rsa.PublicKey), nil
+/*
+func VerifyJWTSignature(tokenString string, publicKey *rsa.PublicKey) (bool, error) {
+	claims := &kitekey.KiteClaims{
+		StandardClaims: jwt.StandardClaims{
+			IssuedAt: time.Now().UTC().Unix(),
+		},
 	}
 
-	// Confirm everything needed is present.
-	if j.Exponent == "" || j.Modulus == "" {
-		return nil, errors.New("missing assets")
-	}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		// since we only use the one private key to sign the tokens,
+		// we also only use its public counter part to verify
+		return publicKey, nil
+	})
 
-	// Decode the exponent from Base64.
-	//
-	// According to RFC 7518, this is a Base64 URL unsigned integer.
-	// https://tools.ietf.org/html/rfc7518#section-6.3
-	var exponent []byte
-	if exponent, err = base64.RawURLEncoding.DecodeString(j.Exponent); err != nil {
-		return nil, err
-	}
-
-	// Decode the modulus from Base64.
-	var modulus []byte
-	if modulus, err = base64.RawURLEncoding.DecodeString(j.Modulus); err != nil {
-		return nil, err
-	}
-
-	// Create the RSA public key.
-	publicKey = &rsa.PublicKey{}
-
-	// Turn the exponent into an integer.
-	//
-	// According to RFC 7517, these numbers are in big-endian format.
-	// https://tools.ietf.org/html/rfc7517#appendix-A.1
-	publicKey.E = int(big.NewInt(0).SetBytes(exponent).Uint64())
-
-	// Turn the modulus into a *big.Int.
-	publicKey.N = big.NewInt(0).SetBytes(modulus)
-
-	// Keep the public key so it won't have to be computed every time.
-	j.precomputed = publicKey
-
-	return publicKey, nil
-}
-
-// Populate - Populate the struct with the given json
-func (j *JSONKey) Populate(jwkJson string) error {
-	// Converts the json jwk to rsa key
-	err := json.Unmarshal([]byte(jwkJson), &j)
+	signingString, err := jwt.SigningString()
 
 	if err != nil {
-		log.Println("microform - getPublicKey - Error parsing json to jwk.")
-		return err
+		log.Println("jwtutils.VerifyJWTSignature - Error getting signing string.")
+		return false, err
 	}
 
-	return nil
-}
+	err = jwt.Method.Verify(signingString, jwt.Signature, publicKey)
+	if err != nil {
+		log.Println("jwtutils.VerifyJWTSignature - Error verifying signature.")
+		return false, err
+	}
+
+	return true, nil
+}*/
+
+// Bibliography
+// https://jwt.io/introduction
+// https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/?utm_source=google&utm_medium=cpc&utm_term=-g-security%20jwt&pm=true&utm_campaign=latam-pt-brazil-generic-authentication&utm_source=google&utm_campaign=latam_mult_bra_all_ciam-dev_dg-ao_auth0_search_google_text_kw_utm2&utm_medium=cpc&utm_term=security%20jwt-c&utm_id=aNK4z0000004GagGAE&gclid=CjwKCAjws--ZBhAXEiwAv-RNL1vSO56fdsTqzIF9Y3A8eGBgr8IdpXBqMW0pixhCUpP5watA3WppuxoC7AYQAvD_BwE
+// https://blog.logrocket.com/jwt-authentication-go/
+// https://www.bacancytechnology.com/blog/golang-jwt
+// https://github.com/golang-jwt/jwt
