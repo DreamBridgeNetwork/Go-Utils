@@ -113,7 +113,7 @@ func VectorStringToStringLine(vectorString []string) string {
 func Base64Decode(str string) (string, error) {
 	data, err := base64.StdEncoding.DecodeString(str)
 	if err != nil {
-		log.Println("stringutils - Base64Decode - Error decoding from base64.")
+		log.Println("stringutils.Base64Decode - Error decoding from base64.")
 		return "", err
 	}
 	return string(data), nil
@@ -122,4 +122,19 @@ func Base64Decode(str string) (string, error) {
 // Base64Encode - Encode string to base64
 func Base64Encode(str string) string {
 	return base64.StdEncoding.EncodeToString([]byte(str))
+}
+
+// Base64URLDecode - Decode from base64 url
+func Base64URLDecode(str string) (string, error) {
+	data, err := base64.URLEncoding.DecodeString(str)
+	if err != nil {
+		log.Println("stringutils.Base64URLDecode - Error decoding from base64 url.")
+		return "", err
+	}
+	return string(data), nil
+}
+
+// Base64URLEncode - Encode string to base64URL
+func Base64URLEncode(str string) string {
+	return base64.URLEncoding.EncodeToString([]byte(str))
 }
