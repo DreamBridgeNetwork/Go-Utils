@@ -5,7 +5,11 @@ import (
 	"testing"
 )
 
+var data = "Rafael de Aquino Cunha"
+
 func TestGenerateRSAKeyPair(t *testing.T) {
+
+	log.Println("TestGenerateRSAKeyPair")
 
 	key, err := GenerateRSAKeyPair(RecomendedSize)
 	if err != nil {
@@ -19,6 +23,8 @@ func TestGenerateRSAKeyPair(t *testing.T) {
 }
 
 func TestSaveKeyPairToGog(t *testing.T) {
+
+	log.Println("TestSaveKeyPairToGog")
 
 	key, err := GenerateRSAKeyPair(RecomendedSize)
 	if err != nil {
@@ -39,6 +45,8 @@ func TestSaveKeyPairToGog(t *testing.T) {
 
 func TestSaveKeyPairToPEM(t *testing.T) {
 
+	log.Println("TestSaveKeyPairToPEM")
+
 	key, err := GenerateRSAKeyPair(RecomendedSize)
 	if err != nil {
 		t.Error("Error generating RSA Key: ", err)
@@ -56,35 +64,87 @@ func TestSaveKeyPairToPEM(t *testing.T) {
 	}
 }
 
-/*func TestImporPrivateKeyPEMFile(t *testing.T) {
-	key, err := GenerateRSAKeyPair(RecomendedSize)
+func TestImporPrivateKeyPEMFile(t *testing.T) {
+
+	log.Println("TestImporPrivateKeyPEMFile")
+
+	genPrivatekey, err := GenerateRSAKeyPair(RecomendedSize)
 	if err != nil {
 		t.Error("Error generating RSA Key: ", err)
+		return
 	}
 
-	if key == nil {
+	if genPrivatekey == nil {
 		t.Error("Error generating RSA Key.")
+		return
 	}
 
-	err = SaveKeyPairToPEM(key)
+	err = SaveKeyPairToPEM(genPrivatekey)
 	if err != nil {
 		t.Error("Error saving Key pair to pem file: ", err)
+		return
 	}
 
-	privateKeyImported, err := ImporPrivateKeyPEMFile("private.pem")
+	importedPrivateKey, err := ImporPrivateKeyPEMFile("private.pem")
 	if err != nil {
 		t.Error("Error importing private key from file: ", err)
+		return
+	}
+	if importedPrivateKey == nil {
+		t.Error("Error importing private key.")
+		return
 	}
 
-	publicKey := &privateKeyImported.PublicKey
+	signatureGen, err := PSSSignData(data, genPrivatekey)
+	if err != nil {
+		t.Error("Error signing data with generated private key: ", err)
+		return
+	}
+	if signatureGen == nil {
+		t.Error("Error signing data with generated private key: nil signature")
+		return
+	}
 
-	log.Println("Private Key: ", privateKeyImported)
-	log.Println("Public key: ", publicKey)
-}*/
+	resultGen, err := VerifyPSSSignature(data, signatureGen, &importedPrivateKey.PublicKey)
+	if err != nil {
+		t.Error("Error veryfing signature: ", err)
+		return
+	}
 
-var data = "Rafael de Aquino Cunha"
+	if !resultGen {
+		t.Error("Signature not confirmed!")
+		return
+	}
+
+	signatureImp, err := PSSSignData(data, importedPrivateKey)
+	if err != nil {
+		t.Error("Error signing data with imported private key: ", err)
+		return
+	}
+	if signatureImp == nil {
+		t.Error("Error signing data with imported private key: nil signature")
+		return
+	}
+
+	resultImp, err := VerifyPSSSignature(data, signatureGen, &genPrivatekey.PublicKey)
+	if err != nil {
+		t.Error("Error veryfing signature: ", err)
+		return
+	}
+
+	if !resultImp {
+		t.Error("Signature not confirmed!")
+		return
+	}
+
+	log.Println("Signatures confirmed!")
+
+}
 
 func TestEncryptDecryptOAEPSHA256(t *testing.T) {
+
+	log.Println("TestEncryptDecryptOAEPSHA256")
+
 	privateKey, err := GenerateRSAKeyPair(RecomendedSize)
 	if err != nil {
 		t.Error("Error generating RSA Key: ", err)
@@ -121,6 +181,9 @@ func TestEncryptDecryptOAEPSHA256(t *testing.T) {
 }
 
 func TestDataSignature(t *testing.T) {
+
+	log.Println("TestDataSignature")
+
 	privateKey, err := GenerateRSAKeyPair(RecomendedSize)
 	if err != nil {
 		t.Error("Error generating RSA Key: ", err)

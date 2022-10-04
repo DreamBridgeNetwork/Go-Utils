@@ -24,8 +24,11 @@ func GenerateRSAKeyPair(bitSize int) (*rsa.PrivateKey, error) {
 		return nil, err
 	}
 
-	//log.Println("Private Key: ", privateKey)
-	//log.Println("Public key: ", privateKey.PublicKey)
+	err = privateKey.Validate()
+	if err != nil {
+		log.Println("rsakey.GenerateRSAKeyPair - Error validating generated keys")
+		return nil, err
+	}
 
 	return privateKey, nil
 }
@@ -241,3 +244,4 @@ func VerifyPSSSignature(data string, signature []byte, publicKey *rsa.PublicKey)
 // https://stackoverflow.com/questions/64104586/use-golang-to-get-rsa-key-the-same-way-openssl-genrsa
 // https://medium.com/@Raulgzm/export-import-pem-files-in-go-67614624adc7
 // https://www.sohamkamani.com/golang/rsa-encryption/
+// https://gist.github.com/goliatone/e9c13e5f046e34cef6e150d06f20a34c
