@@ -51,3 +51,15 @@ func NewClaims(privateJsonString string) (*CustomClaims, error) {
 
 	return &newClaim, nil
 }
+
+func (claims *CustomClaims) GetString() (string, error) {
+
+	claimsJsonStr, err := json.Marshal(claims)
+
+	if err != nil {
+		log.Println("jwtutils.CustomClaims.GetString - Error converting map to json.")
+		return "", err
+	}
+
+	return string(claimsJsonStr), nil
+}

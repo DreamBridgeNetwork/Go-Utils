@@ -7,22 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-/*func GenerateUnsignedJWT(payload string) (string, error) {
-
-	token := jwt.New(jwt.SigningMethodNone)
-
-	claims := token.Claims.(jwt.MapClaims)
-	claims["exp"] = time.Now().Add(10 * time.Minute)
-	claims["authorized"] = true
-	claims["user"] = "username"
-
-	token := jwt.New(jwt.SigningMethodNone)
-
-	tokenString := token.Raw
-
-	return tokenString, nil
-}*/
-
+// GenerateSignedRSAJWT - Generate a signed with RS512 jwt with claims
 func GenerateSignedRSAJWT(claims *CustomClaims, privateKey *rsa.PrivateKey) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS512, claims)
@@ -36,35 +21,22 @@ func GenerateSignedRSAJWT(claims *CustomClaims, privateKey *rsa.PrivateKey) (str
 	return tokenString, nil
 }
 
-/*
-func VerifyJWTSignature(tokenString string, publicKey *rsa.PublicKey) (bool, error) {
-	claims := &kitekey.KiteClaims{
-		StandardClaims: jwt.StandardClaims{
-			IssuedAt: time.Now().UTC().Unix(),
-		},
-	}
+// ParseJWTWithClaims - Parse one jwt string, verify signature and return claims.
+func ParseJWTWithClaims(jwtString string, publicKey interface{}) (*CustomClaims, error) {
 
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		// since we only use the one private key to sign the tokens,
-		// we also only use its public counter part to verify
+	var claims CustomClaims
+
+	_, err := jwt.ParseWithClaims(jwtString, &claims, func(token *jwt.Token) (interface{}, error) {
 		return publicKey, nil
 	})
 
-	signingString, err := jwt.SigningString()
-
 	if err != nil {
-		log.Println("jwtutils.VerifyJWTSignature - Error getting signing string.")
-		return false, err
+		log.Println("jwtutils.ParseJWTWithClaims - Error parsing jwt.")
+		return nil, err
 	}
 
-	err = jwt.Method.Verify(signingString, jwt.Signature, publicKey)
-	if err != nil {
-		log.Println("jwtutils.VerifyJWTSignature - Error verifying signature.")
-		return false, err
-	}
-
-	return true, nil
-}*/
+	return &claims, nil
+}
 
 // Bibliography
 // https://jwt.io/introduction

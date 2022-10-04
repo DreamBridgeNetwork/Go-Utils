@@ -7,20 +7,8 @@ import (
 	"github.com/DreamBridgeNetwork/Go-Utils/pkg/rsakey"
 )
 
-/*func TestGenerateUnsignedJWT(t *testing.T) {
-	log.Println("TestGenerateUnsignedJWT")
-
-	tokenString, err := GenerateUnsignedJWT()
-	if err != nil {
-		t.Error("Error generating unsigned jwt: ", err)
-		return
-	}
-
-	log.Println("JWT: ", tokenString)
-}*/
-
-func TestGenerateSignedRSAJWT(t *testing.T) {
-	log.Println("TestGenerateSignedRSAJWT")
+func TestJWTGenerationValidation(t *testing.T) {
+	log.Println("TestJWTGenerationValidation")
 
 	key, err := rsakey.GenerateRSAKeyPair(rsakey.RecomendedSize)
 	if err != nil {
@@ -29,23 +17,26 @@ func TestGenerateSignedRSAJWT(t *testing.T) {
 	}
 
 	if key == nil {
-		t.Error("Error generating RSA Key.")
+		t.Error("Generated Key is null.")
 		return
 	}
 
-	coronaVirusJSON := `{
-        "name" : "covid-11",
+	testeJson := `{
         "country" : "China",
         "city" : "Wuhan",
-        "reason" : "Non vedge Food",
-		"place" : {
-			"name" : "Nome 1",
-			"pais" : "Brasil",
-			"cidade" : "São Paulo"
-		}
+		"people" : [
+			{
+				"name" : "Name 1",
+				"email" : "email1@email.com"
+			},
+			{
+				"name" : "Name 2",
+				"email" : "email2@email.com"
+			}
+		]
     }`
 
-	claims, err := NewClaims(coronaVirusJSON)
+	claims, err := NewClaims(testeJson)
 	if err != nil {
 		t.Error("Error generating new claim: ", err)
 		return
@@ -53,9 +44,25 @@ func TestGenerateSignedRSAJWT(t *testing.T) {
 
 	tokenString, err := GenerateSignedRSAJWT(claims, key)
 	if err != nil {
-		t.Error("Error generating unsigned jwt: ", err)
+		t.Error("Error generating signed jwt: ", err)
 		return
 	}
 
 	log.Println("JWT: ", tokenString)
+
+	key.Public()
+
+	tokenClaims, err := ParseJWTWithClaims(tokenString, key.Public())
+	if err != nil {
+		t.Error("Error parsing jwt: ", err)
+		return
+	}
+
+	claimsJson, err := tokenClaims.GetString()
+	if err != nil {
+		t.Error("Error converting clains to json string: ", err)
+		return
+	}
+
+	log.Println("claims: ", claimsJson)
 }
