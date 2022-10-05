@@ -3,7 +3,6 @@ package stringutils
 import (
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"log"
 	"math/rand"
 	"strings"
@@ -21,20 +20,23 @@ func Reverse(s string) string {
 	return string(r)
 }
 
-// CriptografaString - Criptografa uma senha
-func CriptografaString(senha string, cost int) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(senha), cost)
+// GenerateStringHash - Returns the hash of a pessaword.
+func GenerateStringHash(data string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(data), bcrypt.DefaultCost)
 
-	fmt.Println("Hash: " + string(bytes))
-	return string(bytes), err
+	if err != nil {
+		log.Println("stringutils.GeneratePasswordHash - Error generating password hash.")
+		return "", nil
+	}
+	return string(bytes), nil
 }
 
-// CheckStringHash - Verifica se a criptografia corresponde à string passada
+// CheckStringHash - Confirms if some string matchs the hash
 func CheckStringHash(str, hash string) (bool, error) {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(str))
 
 	if err != nil {
-		log.Println("checkStringHash - Erro ao validar string.")
+		log.Println("stringutils.checkStringHash - Error validating string hash.")
 		return false, err
 	}
 
