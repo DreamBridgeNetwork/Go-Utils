@@ -20,8 +20,8 @@ func Reverse(s string) string {
 	return string(r)
 }
 
-// GenerateStringHash - Returns the hash of a pessaword.
-func GenerateStringHash(data string) (string, error) {
+// GeneratePasswordHash - Returns the hash of a pessaword.
+func GeneratePasswordHash(data string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(data), bcrypt.DefaultCost)
 
 	if err != nil {
