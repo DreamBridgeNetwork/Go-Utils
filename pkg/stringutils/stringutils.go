@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"math/rand"
+	"regexp"
 	"strings"
 	"time"
 
@@ -139,4 +140,22 @@ func Base64URLDecode(str string) (string, error) {
 // Base64URLEncode - Encode string to base64URL
 func Base64URLEncode(str string) string {
 	return base64.URLEncoding.EncodeToString([]byte(str))
+}
+
+// ValidateStringRegex - return if the data matchs the expression
+func ValidateStringRegex(data, regexExpr string) (bool, error) {
+	regex, err := regexp.Compile(regexExpr)
+
+	if err != nil {
+		log.Println("stringutils.ValidateStringRegex - Error compiling regex expression.")
+		return false, err
+	}
+
+	matchsStrings := regex.FindAllString(data, 2)
+
+	if (len(matchsStrings) == 1) && (len(matchsStrings[0]) == len(data)) {
+		return true, nil
+	}
+
+	return false, nil
 }
