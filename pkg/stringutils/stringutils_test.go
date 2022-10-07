@@ -15,34 +15,6 @@ func TestReverse(t *testing.T) {
 	}
 }
 
-func TestGenerateStringHash(t *testing.T) {
-	log.Println("TestGenerateStringHash")
-
-	password := "This is my password"
-
-	hash, err := GeneratePasswordHash(password)
-	if err != nil {
-		t.Error("Error generating hash: ", err)
-		return
-	}
-
-	log.Println("Hash: ", hash)
-
-	resp, err := CheckStringHash(password, hash)
-
-	if err != nil {
-		t.Error("Error testing if hash matchs string: ", err)
-		return
-	}
-
-	if !resp {
-		t.Error("Hash didn´t match string.")
-		return
-	}
-
-	log.Println("TestGenerateStringHash OK")
-}
-
 func TestValidateStringRegex(t *testing.T) {
 	log.Println("TestValidateStringRegex")
 

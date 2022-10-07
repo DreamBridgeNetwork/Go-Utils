@@ -43,24 +43,16 @@ func (db *MariaDB) Connect() error {
 		connection, err := gorm.Open(mysql.New(*db.Config), &gorm.Config{})
 
 		if err != nil {
-			log.Println("mariadb.Connect - Error creating db connection.")
+			log.Println("mariadb.Connect - Error openning db connection.")
 			return err
 		}
 
 		db.Connection = connection
 	}
 
-	sqldb, err := db.Connection.DB()
+	err := db.TesteConnection()
 	if err != nil {
-		db.Connection = nil
-		log.Println("mariadb.Connect - Error opening DB connection.")
-		return err
-	}
-
-	err = sqldb.Ping()
-	if err != nil {
-		db.Connection = nil
-		log.Println("database.Connect - Error testing db connection.")
+		log.Println("mariadb.Connect - Error testing db connection")
 		return err
 	}
 
@@ -98,5 +90,30 @@ func (db *MariaDB) MigrateStruct(structToMigrate interface{}) error {
 		log.Println("database.InitialMigration - Error migrating struct to DB.")
 		return err
 	}
+	return nil
+}
+
+func (db *MariaDB) TesteConnection() error {
+	if db.Connection == nil {
+		errMsg := "database not connected"
+		log.Println("mariadb.TesteConnection - " + errMsg + ".")
+
+		return errors.New(errMsg)
+	}
+
+	sqldb, err := db.Connection.DB()
+	if err != nil {
+		db.Connection = nil
+		log.Println("mariadb.TesteConnection - Error opening DB connection.")
+		return err
+	}
+
+	err = sqldb.Ping()
+	if err != nil {
+		db.Connection = nil
+		log.Println("database.TesteConnection - Error testing db connection.")
+		return err
+	}
+
 	return nil
 }

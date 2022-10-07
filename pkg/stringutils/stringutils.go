@@ -8,8 +8,6 @@ import (
 	"regexp"
 	"strings"
 	"time"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
 // Reverse returns its argument string reversed rune-wise left to right.
@@ -19,29 +17,6 @@ func Reverse(s string) string {
 		r[i], r[j] = r[j], r[i]
 	}
 	return string(r)
-}
-
-// GeneratePasswordHash - Returns the hash of a pessaword.
-func GeneratePasswordHash(data string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(data), bcrypt.DefaultCost)
-
-	if err != nil {
-		log.Println("stringutils.GeneratePasswordHash - Error generating password hash.")
-		return "", nil
-	}
-	return string(bytes), nil
-}
-
-// CheckStringHash - Confirms if some string matchs the hash
-func CheckStringHash(str, hash string) (bool, error) {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(str))
-
-	if err != nil {
-		log.Println("stringutils.checkStringHash - Error validating string hash.")
-		return false, err
-	}
-
-	return true, nil
 }
 
 // SeparaNomeSobrenome - Separa uma string de nome completo em nome e sobrenome. OBS: Não funciona para nome composto.
